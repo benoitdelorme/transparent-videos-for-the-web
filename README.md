@@ -1,3 +1,35 @@
+# Why This HTML Script Exists – Extracting PNG Frames with Alpha from a WebM Video
+
+Transparent WebM videos — especially those encoded with **VP8 or VP9** — store transparency (alpha) **within the video stream itself**, rather than as a separate alpha channel. Because of this:
+
+- **VP8** does **not** support a proper alpha channel at all
+- Even **VP9** encodes alpha in a compressed, embedded format
+- Tools like **FFmpeg cannot reliably extract frames with transparency intact** from such `.webm` files
+
+## 🎯 The Solution
+
+This HTML/JavaScript script uses a combination of the `<video>` and `<canvas>` elements to:
+
+1. Load a `.webm` video with transparency
+2. Read each frame at a defined frame rate (e.g., 30 fps)
+3. Draw the frame on a `<canvas>` element
+4. Export the result as a **PNG file with preserved alpha transparency**
+
+## 🔄 Purpose
+
+This workflow allows you to:
+- **Reconstruct a full image sequence** from a transparent WebM
+- Preserve the **original alpha channel**
+- Post-process or crop the sequence using **FFmpeg** or other tools
+- Export to formats like **ProRes `.mov` (Safari-compatible)** or **VP9 `.webm` (optimized for web)**
+
+## 📦 When to Use
+
+Use this script if:
+- You have a `.webm` file with transparency
+- You want to **crop, convert, or edit** it while preserving alpha
+- You need **high-quality per-frame export** or cross-browser compatibility
+
 
 # FFmpeg Guide: From PNG Sequence to MOV and WebM (with Cropping)
 
@@ -40,6 +72,12 @@ ffmpeg -i output.mov \
 
 ---
 
+## 🌐 Step 4  - Convert .mov to HEVC
+- Open video .mov with Quicktime
+- Export as 1080p
+- Keep transparency
+- Select HEVC
+
 ## 🌐 Step 3 – Convert `.webm` to cropped `.webm` with CRF 20 (VP9 + alpha)
 
 This example applies the same crop as above (850px left/right, 20px bottom), with light compression.
@@ -63,4 +101,5 @@ ffmpeg -i input.webm \
 - **Safari only supports `.mov` (ProRes 4444)** for transparency
 - **Chrome/Firefox support `.webm` (VP9 + alpha)** — but not Safari
 - Use both formats for full browser compatibility
+
 
