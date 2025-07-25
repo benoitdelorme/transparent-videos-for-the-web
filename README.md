@@ -101,5 +101,6 @@ ffmpeg -i input.webm \
 - **Safari only supports `.mov` (ProRes 4444)** for transparency
 - **Chrome/Firefox support `.webm` (VP9 + alpha)** — but not Safari
 - Use both formats for full browser compatibility
+- Resource : https://www.youtube.com/watch?v=Xg6aYfuvRHk&t=51s&ab_channel=YuriArtiukh
 
 
