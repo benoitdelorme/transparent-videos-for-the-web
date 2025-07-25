@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Export PNG frames from transparent WebM</title>
+  <style>
+    video, canvas { display: none; }
+    #log { font-family: monospace; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <input type="file" id="upload" accept="video/webm">
+  <button id="start" disabled>Start Export</button>
+  <p id="log">Load your transparent WebM file</p>
+
+  <video id="video" crossorigin="anonymous"></video>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const upload = document.getElementById('upload');
+    const start = document.getElementById('start');
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const log = document.getElementById('log');
+
+    let frames = [];
+
+    upload.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      video.src = url;
+      start.disabled = false;
+      log.textContent = `Video loaded: ${file.name}`;
+    });
+
+    start.addEventListener('click', async () => {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      const fps = 30;
+      const duration = video.duration;
+      const totalFrames = Math.floor(duration * fps);
+      let frameIndex = 0;
+
+      log.textContent = `Extracting ${totalFrames} frames at ${fps} fps...`;
+
+      for (let t = 0; t < duration; t += 1 / fps) {
+        await seekToTime(t);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+        downloadBlob(blob, `frame_${String(frameIndex).padStart(4, '0')}.png`);
+        log.textContent = `Saved frame ${frameIndex + 1} / ${totalFrames}`;
+        frameIndex++;
+      }
+
+      log.textContent += '\n✅ Done.';
+    });
+
+    function seekToTime(time) {
+      return new Promise(resolve => {
+        const handler = () => {
+          video.removeEventListener('seeked', handler);
+          resolve();
+        };
+        video.addEventListener('seeked', handler);
+        video.currentTime = time;
+      });
+    }
+
+    function downloadBlob(blob, filename) {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+    }
+  </script>
+</body>
+</html>
